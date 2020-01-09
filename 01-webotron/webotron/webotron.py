@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+
+"""
+Webotron: Deploy websites with aws.
+
+Webotron automates the process of deploying static web pages into AWS
+- Configure AWS S3 buckets
+    - Create them
+    - Set them up for static website hosting
+    - Synching the contest of a local directory with S3 bucket
+- Configure DNS with AWS Route 53
+"""
+
 import boto3
 import click
 import mimetypes
@@ -8,28 +21,32 @@ from pathlib import Path
 session = boto3.Session()
 s3 = session.resource('s3')
 
+
 @click.group()
 def cli():
-    "Webtron deploys websites to AWS"
+    """Webtron deploys websites to AWS."""
     pass
+
 
 @cli.command('list-buckets')
 def list_buckets():
-    "List all s3 buckets"
+    """List all s3 buckets."""
     for bucket in s3.buckets.all():
         print(bucket)
+
 
 @cli.command('list-bucket-objects')
 @click.argument('bucket')
 def list_bucket_objects(bucket):
-    "List objects in s3 bucket"
+    """List objects in s3 bucket."""
     for obj in s3.Bucket(bucket).objects.all():
         print(obj)
+
 
 @cli.command('setup-bucket')
 @click.argument('bucket')
 def setup_bucket(bucket):
-    "Create and configure S3 bucket"
+    """Create and configure S3 bucket."""
     try:
         s3_bucket = s3.create_bucket(Bucket=bucket, CreateBucketConfiguration={'LocationConstraint': session.region_name})
     except ClientError as e:
@@ -69,7 +86,9 @@ def setup_bucket(bucket):
 
     return
 
+
 def upload_file(s3_bucket, path, key):
+    """Upload file to a specified bucket."""
     content_type = mimetypes.guess_type(key)[0] or 'text/plain'
     s3_bucket.upload_file(
         path,
@@ -79,22 +98,24 @@ def upload_file(s3_bucket, path, key):
         }
     )
 
+
 @cli.command('sync')
 @click.argument('pathname', type=click.Path(exists=True))
 @click.argument('bucket')
 def sync(pathname, bucket):
-    "Sync contest of PATHNAME to BUCKET"
-
+    """Sync contest of PATHNAME to BUCKET."""
     s3_bucket = s3.Bucket(bucket)
     root = Path(pathname).expanduser().resolve()
 
     def handle_directory(target):
         for p in target.iterdir():
-            if p.is_dir(): handle_directory(p)
-            if p.is_file(): upload_file(s3_bucket, str(p), str(p.relative_to(root))) 
-                
+            if p.is_dir():
+                handle_directory(p)
+            if p.is_file():
+                upload_file(s3_bucket, str(p), str(p.relative_to(root)))
+       
     handle_directory(root)
 
 
 if __name__ == '__main__':
-   cli()
+    cli()
