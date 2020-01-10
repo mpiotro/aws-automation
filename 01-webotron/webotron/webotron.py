@@ -67,6 +67,7 @@ def sync(pathname, bucket):
     """Sync contest of PATHNAME to BUCKET."""
     s3_bucket = bucket_manager.s3.Bucket(bucket)
     bucket_manager.sync(pathname, bucket)
+    print(bucket_manager.get_bucket_url(bucket_manager.s3.Bucket(bucket)))
 
 
 if __name__ == '__main__':
