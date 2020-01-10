@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""Classes for S3 Buckets."""
+
 import mimetypes
 
 from botocore.exceptions import ClientError
 from pathlib import Path
-
-"""Classes for S3 Buckets."""
 
 
 class BucketManager:
