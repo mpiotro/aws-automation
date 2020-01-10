@@ -91,7 +91,7 @@ class BucketManager:
         paginator = self.s3.meta.client.get_paginator('list_objects_v2')
 
         for page in paginator.paginate(Bucket=bucket.name):
-            for obj in page.get('Contest', []):
+            for obj in page.get('Contents', []):
                 self.manifest[obj['Key']] = obj['ETag']
 
     @staticmethod
@@ -128,9 +128,10 @@ class BucketManager:
     def upload_file(self, bucket, path, key):
         """Upload path to s3_bucket at key."""
         content_type = mimetypes.guess_type(key)[0] or 'text/plain'
-
         etag = self.gen_etag(path)
+
         if self.manifest.get(key, '') == etag:
+            print("skipping {} etag match".format(etag))
             return
 
         return bucket.upload_file(
