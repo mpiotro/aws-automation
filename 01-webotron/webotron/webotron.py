@@ -19,9 +19,10 @@ from bucket import BucketManager
 session = None
 bucket_manager = None
 
+
 @click.group()
 @click.option('--profile', default=None,
-    help="Use a given AWS profile.")
+              help="Use a given AWS profile.")
 def cli(profile):
     """Webtron deploys websites to AWS."""
     global session, bucket_manager
@@ -65,7 +66,6 @@ def setup_bucket(bucket):
 @click.argument('bucket')
 def sync(pathname, bucket):
     """Sync contest of PATHNAME to BUCKET."""
-    s3_bucket = bucket_manager.s3.Bucket(bucket)
     bucket_manager.sync(pathname, bucket)
     print(bucket_manager.get_bucket_url(bucket_manager.s3.Bucket(bucket)))
 
